@@ -7,4 +7,4 @@ ADD . /app
 WORKDIR /app
 
 # run
-ENTRYPOINT ["PORT=7777" "python" "src/app.py"]
+ENTRYPOINT ["sh","start.sh"]
