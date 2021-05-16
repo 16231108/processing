@@ -1,6 +1,5 @@
 import pickle
 import queue
-import logging
 import threading
 import hashlib
 import requests
@@ -9,9 +8,6 @@ import json
 
 from work import Work
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s  %(filename)s : %(levelname)s  %(message)s',
-                    datefmt='%Y-%m-%d %A %H:%M:%S')
 
 class TaggingClientWork(Work):
     def __init__(self, translated=False, server_ip='140.143.5.134:27777', **task):
@@ -34,7 +30,7 @@ class TaggingClientWork(Work):
         self.threads = []
         for i in range(1):
             self.threads.append(threading.Thread(target=self.tagging))
-
+        
         self.threads.append(threading.Thread(target=self.updatedata))
 
         for i in range(1):
@@ -55,14 +51,14 @@ class TaggingClientWork(Work):
 
     def tagging(self):
         base_key = 'buaa_label_2019'
-
+    
         def get_api_key(base_key):
             base_key += ("-" + time.strftime("%F-%H"))
             md5 = hashlib.md5()
             base_key = base_key.encode('utf-8')
             md5.update(base_key)
             return md5.hexdigest()
-
+    
         while not self.stop:
             try:
                 k = self.intq.get(timeout=2)
@@ -71,10 +67,10 @@ class TaggingClientWork(Work):
             response = requests.post(f'http://{self.server_ip}/sci_label',
                                      data={'api_key': get_api_key(base_key),
                                            'paper_list': json.dumps(k)})
-
+    
             out = json.loads(response.text)
-
-            if 'success' in out['msg']:
+    
+            if out['msg'] == 'success':
                 self.outq.put(out['data'])
             else:
                 self.intq.put(k)
@@ -84,7 +80,7 @@ if __name__ == '__main__':
     SSHINFO = {
         'ssh_address_or_host': ('47.92.240.36', 22),  # 指定ssh登录的跳转机的address
         'ssh_username': 'jt',  # 跳转机的用户
-        'ssh_password': getpass.getpass('passwd'),
+        'ssh_password': 'vdaubCp7yaSreqlT',
         'remote_bind_address': ('192.168.0.84', 3306)
     }
 

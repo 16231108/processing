@@ -5,7 +5,8 @@ import threading
 from src import app
 
 log = logging.getLogger(__name__)
-
+os.environ['SSH_USERNAME']='jt'
+os.environ['SSH_PASSWORD']='vdaubCp7yaSreqlT'
 def test_tagging(client):
     res = client.post('/configmysql',json=dict(
         host='192.168.0.84',
