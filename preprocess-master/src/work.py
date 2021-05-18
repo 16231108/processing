@@ -6,10 +6,7 @@ import pymysql
 import logging
 from sshtunnel import SSHTunnelForwarder
 
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s  %(filename)s : %(levelname)s  %(message)s',
-                    datefmt='%Y-%m-%d %A %H:%M:%S')
+log = logging.getLogger(__name__)
 
 _SETLOCK = threading.Lock()
 _CURRENTID = set()
@@ -18,7 +15,7 @@ _REMAIN = 0
 
 
 class Work:
-    def __init__(self, table='', done_recall=None, mysql_info=None, ssh_info=None, test=False, **args):
+    def __init__(self, table='', done_recall=None, mysql_info=None, ssh_info=None, test=False):
         self.stop = False
         self.test = test
         self.table = table
@@ -36,7 +33,7 @@ class Work:
     def run(self):
         self.set_total()
         if self.test:
-            logging.info(f'get total {_TOTAL} {_REMAIN}')
+            log.info(f'get total {_TOTAL} {_REMAIN}')
 
         for t in self.threads:
             t.start()
@@ -55,8 +52,6 @@ class Work:
         conn.close()
 
         _REMAIN = _TOTAL = total
-        if _TOTAL == 0:
-            self.stop = True
         return total
 
     def getdata(self):
@@ -105,7 +100,7 @@ class Work:
             if len(k):
                 self.intq.put(k)
                 k = []
-        logging.info('getdata finished')
+        log.info('getdata finished')
 
     def updatedata(self):
         global _REMAIN
@@ -113,7 +108,7 @@ class Work:
         cursor = conn.cursor()
 
         self.done_recall(0, _TOTAL)
-        while not self.stop:
+        while True:
             k = self.outq.get()
             for i in list(k.keys()):
                 sql = self.sql_update_data.format(i)
@@ -124,11 +119,11 @@ class Work:
                 cursor.execute(sql, self.format_update_data(k[i]))
 
             conn.commit()
-            _REMAIN -= min(len(k), _REMAIN)
+            _REMAIN -= len(k)
             self.done_recall(_TOTAL - _REMAIN, _REMAIN)
             if _REMAIN <= 0 or\
                (self.test and _TOTAL - _REMAIN > 300):
-                logging.info('updatedata want stop')
+                log.info('updatedata want stop')
                 self.stop = True
                 break
-        logging.info('updatedata finished')
+        log.info('updatedata finished')
