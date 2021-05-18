@@ -12,7 +12,6 @@ from translate_work import TranslateWork
 from taggingclient_work import TaggingClientWork
 
 import pymysql
-
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s  %(filename)s : %(levelname)s  %(message)s',
                     datefmt='%Y-%m-%d %A %H:%M:%S')

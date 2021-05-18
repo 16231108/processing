@@ -1,7 +1,4 @@
-FROM python:3.7
-
-COPY ./requirements.txt /
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r /requirements.txt
+FROM star16231108/python:3.7
 
 ADD . /app
 WORKDIR /app
